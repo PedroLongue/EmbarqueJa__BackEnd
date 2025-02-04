@@ -1,7 +1,10 @@
 import express from "express";
 
+require("dotenv").config();
+
+const PORT = process.env.PORT
 const app = express();
-const PORT = 3000;
+
 
 app.get("/", (req, res) => {
   res.send("Tetsing API!");
