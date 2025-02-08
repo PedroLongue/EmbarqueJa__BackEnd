@@ -6,9 +6,14 @@ const PORT = process.env.PORT
 const app = express();
 
 
-app.get("/", (req, res) => {
-  res.send("Tetsing API!");
-});
+//routes
+const router = require("./routes/Router.ts");
+
+app.use(router);
+
+
+//DB connextion
+require("./config/db.ts");
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
