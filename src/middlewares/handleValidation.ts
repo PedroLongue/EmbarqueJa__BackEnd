@@ -8,7 +8,7 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
     return next();
   }
 
-  const extractedErrors: any[] = [];
+  const extractedErrors: string[] = [];
 
   errors.array().map((err: { msg: string }) => extractedErrors.push(err.msg));
 
