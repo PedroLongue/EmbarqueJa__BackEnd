@@ -2,15 +2,15 @@ import express from "express";
 
 require("dotenv").config();
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT;
 const app = express();
-
 
 //routes
 const router = require("./routes/Router.ts");
 
-app.use(router);
+app.use(express.json());
 
+app.use(router);
 
 //DB connextion
 require("./config/db.ts");
