@@ -76,16 +76,35 @@ export const login = async (req: IAuthRequest, res: Response) => {
   //Return user with token
   res.status(201).json({
     _id: user._id,
-    profileImage: user.profileImage,
     token: generateToken(user._id),
   });
 };
 
 //Get  curring logged in user
+// Get current logged in user
 export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
-  const user = req.user;
+  const userId = req.user; // Supondo que req.user contém o ID do usuário
 
-  res.status(200).json(user);
+  try {
+    const user = await User.findById(userId).select("-password");
+
+    // Verifica se o usuário existe
+    if (!user) {
+      res.status(404).json({ errors: ["Usuário não encontrado"] });
+      return;
+    }
+
+    // Retorna o usuário com o campo isAdmin
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin, // Incluindo o campo isAdmin na resposta
+    });
+  } catch (error) {
+    res.status(404).json({ errors: ["Usuário não encontrado"] });
+    return;
+  }
 };
 
 //Get user by id
