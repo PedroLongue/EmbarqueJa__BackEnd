@@ -1,7 +1,6 @@
 import { Tickets } from "../models/Tickets";
 import { Request, Response } from "express";
 
-// Criar nova passagem
 export const createTicket = async (req: Request, res: Response) => {
   try {
     const {
@@ -17,7 +16,6 @@ export const createTicket = async (req: Request, res: Response) => {
       price,
     } = req.body;
 
-    // Criar passagem
     const newTicket = await Tickets.create({
       origin,
       destination,
@@ -37,7 +35,6 @@ export const createTicket = async (req: Request, res: Response) => {
   }
 };
 
-// Obter todas as passagens
 export const getTickets = async (req: Request, res: Response) => {
   try {
     const tickets = await Tickets.find();
@@ -47,7 +44,6 @@ export const getTickets = async (req: Request, res: Response) => {
   }
 };
 
-// Obter passagem por ID
 export const getTicketById = async (req: Request, res: Response) => {
   const { id } = req.params;
 

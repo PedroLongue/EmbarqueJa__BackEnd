@@ -7,10 +7,9 @@ const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
 interface IAuthRequest extends Request {
-    user?: string
+  user?: string;
 }
 
-// Generate User Token
 export const generateToken = (id: string) => {
   return jwt.sign({ id }, jwtSecret, {
     expiresIn: "7d",
@@ -99,15 +98,13 @@ export const getUserById = async (req: IAuthRequest, res: Response) => {
     //check if user exists
     if (!user) {
       res.status(404).json({ errors: ["Usuário não encontrado"] });
-  
+
       return;
     }
     res.status(200).json(user);
-    
   } catch (error) {
     res.status(404).json({ errors: ["Usuário não encontrado"] });
 
     return;
   }
-  
 };
