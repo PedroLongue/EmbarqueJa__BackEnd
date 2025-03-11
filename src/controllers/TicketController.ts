@@ -60,3 +60,33 @@ export const getTicketById = async (req: Request, res: Response) => {
     res.status(404).json({ errors: ["Passagem não encontrada."] });
   }
 };
+
+export const searchTickets = async (req: Request, res: Response) => {
+  const { origin, destination, departureDate } = req.query;
+
+  try {
+    if (!origin || !destination || !departureDate) {
+      res.status(400).json({ errors: ["Parâmetros de busca incompletos."] });
+      return;
+    }
+
+    const formattedDepartureDate = new Date(
+      departureDate as string
+    ).toISOString();
+
+    const tickets = await Tickets.find({
+      origin: origin as string,
+      destination: destination as string,
+      departureDate: formattedDepartureDate,
+    });
+
+    if (tickets.length === 0) {
+      res.status(404).json({ errors: ["Nenhuma passagem encontrada."] });
+      return;
+    }
+
+    res.status(200).json(tickets);
+  } catch (error) {
+    res.status(500).json({ errors: ["Erro ao buscar passagens."] });
+  }
+};
