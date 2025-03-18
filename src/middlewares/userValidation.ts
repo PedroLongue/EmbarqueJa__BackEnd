@@ -1,8 +1,10 @@
-const { body } = require("express-validator"); 
+const { body } = require("express-validator");
 
 interface IValidatorOptions {
-    req: { body: { password: string } };
-  }
+  req: {
+    body: { password: string; newPassword: string; confirmNewPassword: string };
+  };
+}
 
 export const userCreateValidation = () => {
   return [
@@ -41,5 +43,27 @@ export const loginValidation = () => {
       .isEmail()
       .withMessage("Insira um e-mail válido."),
     body("password").isString().withMessage("A senha é obrigatória."),
+  ];
+};
+
+export const changePasswordValidation = () => {
+  return [
+    body("currentPassword")
+      .isString()
+      .withMessage("A senha atual é obrigatória."),
+    body("newPassword")
+      .isString()
+      .withMessage("A nova senha é obrigatória.")
+      .isLength({ min: 5 })
+      .withMessage("A nova senha precisa ter no mínimo 5 caracteres."),
+    body("confirmNewPassword")
+      .isString()
+      .withMessage("A confirmação da nova senha é obrigatória.")
+      .custom((value: string, { req }: IValidatorOptions) => {
+        if (value !== req.body.newPassword) {
+          throw new Error("As novas senhas não são iguais.");
+        }
+        return true;
+      }),
   ];
 };

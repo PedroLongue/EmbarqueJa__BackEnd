@@ -80,7 +80,6 @@ export const login = async (req: IAuthRequest, res: Response) => {
   });
 };
 
-//Get  curring logged in user
 // Get current logged in user
 export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
   const userId = req.user; // Supondo que req.user contém o ID do usuário
@@ -125,5 +124,52 @@ export const getUserById = async (req: IAuthRequest, res: Response) => {
     res.status(404).json({ errors: ["Usuário não encontrado"] });
 
     return;
+  }
+};
+
+export const changePassword = async (req: IAuthRequest, res: Response) => {
+  const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+  try {
+    // Verifica se o usuário está autenticado
+    if (!req.user) {
+      return res.status(401).json({ errors: ["Usuário não autenticado."] });
+    }
+
+    // Encontra o usuário no banco de dados com a senha
+    const user = await User.findById(req.user);
+
+    if (!user) {
+      return res.status(404).json({ errors: ["Usuário não encontrado."] });
+    }
+
+    // Verifica se a senha atual está correta
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(422).json({ errors: ["Senha atual incorreta."] });
+    }
+
+    // Verifica se a nova senha e a confirmação são iguais
+    if (newPassword !== confirmNewPassword) {
+      return res
+        .status(422)
+        .json({ errors: ["As novas senhas não coincidem."] });
+    }
+
+    // Gera o hash da nova senha
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Atualiza a senha do usuário
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: "Senha alterada com sucesso." });
+  } catch (error) {
+    console.error("Erro ao alterar a senha:", error);
+    return res
+      .status(500)
+      .json({ errors: ["Erro ao processar a solicitação."] });
   }
 };

@@ -22,7 +22,8 @@ export const authGuard = async (
   try {
     const verified = jwt.verify(token, jwtSecret);
 
-    req.user = await User.findById(verified.id).select("-password");
+    // Pass only the user ID to req.user
+    req.user = verified.id;
 
     next();
   } catch (error) {

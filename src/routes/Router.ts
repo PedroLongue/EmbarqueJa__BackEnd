@@ -7,6 +7,6 @@ router.get("/api", (req: Request, res: Response) => {
 });
 
 router.use("/api/users", require("./UserRoutes"));
-router.use('/api/tickets', require('./TicketRoutes'))
+router.use("/api/tickets", require("./TicketRoutes"));
 
 module.exports = router;
