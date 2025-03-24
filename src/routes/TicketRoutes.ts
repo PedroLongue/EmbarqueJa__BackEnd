@@ -5,6 +5,7 @@ import {
   getTickets,
   getTicketById,
   searchTickets,
+  reserveSeats,
 } from "../controllers/TicketController";
 
 import { validate } from "../middlewares/handleValidation";
@@ -14,5 +15,6 @@ router.post("/create", ticketValidation(), validate, createTicket);
 router.get("/search", searchTickets);
 router.get("/", getTickets);
 router.get("/:id", getTicketById);
+router.post("/:id/reserve", reserveSeats);
 
 module.exports = router;
