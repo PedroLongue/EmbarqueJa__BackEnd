@@ -29,7 +29,7 @@ export const ticketValidation = () => {
     body("type")
       .isString()
       .withMessage("O tipo de passagem é obrigatório.")
-      .isIn(["Convencional", "Leito", "Semi-Leito"])
+      .isIn(["Convencional", "Leito", "Semi-Leito", "Executivo", "Leito-cama"])
       .withMessage("O tipo deve ser 'Convencional', 'Leito' ou 'Semi-Leito'."),
 
     body("amenities")
@@ -47,5 +47,19 @@ export const ticketValidation = () => {
     body("price")
       .isFloat({ min: 0 })
       .withMessage("O preço deve ser um número maior ou igual a zero."),
+  ];
+};
+
+export const updateUserValidation = () => {
+  return [
+    body("cpf")
+      .optional()
+      .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/)
+      .withMessage("Insira um CPF válido no formato XXX.XXX.XXX-XX."),
+    body("birthDate")
+      .optional()
+      .isISO8601()
+      .toDate()
+      .withMessage("Insira uma data de nascimento válida (YYYY-MM-DD)."),
   ];
 };

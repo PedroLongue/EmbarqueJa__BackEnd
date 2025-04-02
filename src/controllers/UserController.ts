@@ -98,7 +98,9 @@ export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isAdmin: user.isAdmin, // Incluindo o campo isAdmin na resposta
+      isAdmin: user.isAdmin,
+      cpf: user.cpf || null,
+      birthDate: user.birthDate || null,
     });
   } catch (error) {
     res.status(404).json({ errors: ["Usuário não encontrado"] });
@@ -171,5 +173,38 @@ export const changePassword = async (req: IAuthRequest, res: Response) => {
     return res
       .status(500)
       .json({ errors: ["Erro ao processar a solicitação."] });
+  }
+};
+
+export const updateUserInfo = async (req: IAuthRequest, res: Response) => {
+  const { cpf, birthDate } = req.body;
+  const userId = req.user;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ errors: ["Usuário não encontrado."] });
+    }
+
+    // Atualiza os dados opcionais
+    if (cpf) user.cpf = cpf;
+    if (birthDate) user.birthDate = new Date(birthDate);
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Informações atualizadas com sucesso.",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        cpf: user.cpf,
+        birthDate: user.birthDate,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ errors: ["Erro ao atualizar informações."] });
   }
 };
