@@ -7,12 +7,22 @@ import {
   searchTickets,
   reserveSeats,
 } from "../controllers/TicketController";
+import {
+  cancelReservation,
+  confirmReservation,
+  createTicketReservation,
+  getPendingReservation,
+} from "../controllers/TicketReservation";
 
 import { validate } from "../middlewares/handleValidation";
 import { ticketValidation } from "../middlewares/ticketValidation";
 
 router.post("/create", ticketValidation(), validate, createTicket);
 router.get("/search", searchTickets);
+router.post("/reservations", createTicketReservation);
+router.get("/reservations/:userId", getPendingReservation);
+router.patch("/reservations/:reservationId/confirm", confirmReservation);
+router.delete("/reservations/:reservationId", cancelReservation);
 router.get("/", getTickets);
 router.get("/:id", getTicketById);
 router.post("/:id/reserve", reserveSeats);
