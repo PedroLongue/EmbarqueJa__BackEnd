@@ -3,6 +3,7 @@ export const TicketReservation = require("mongoose").model(
   {
     userId: { type: Object, required: true },
     ticketId: { type: Object, required: true },
+    seats: { type: [Number], default: [] },
     status: {
       type: String,
       enum: ["pending", "confirmed"],
