@@ -5,7 +5,6 @@ import {
   getTickets,
   getTicketById,
   searchTickets,
-  reserveSeats,
 } from "../controllers/TicketController";
 import {
   cancelReservation,
@@ -25,6 +24,5 @@ router.patch("/reservations/:reservationId/confirm", confirmReservation);
 router.delete("/reservations/:reservationId", cancelReservation);
 router.get("/", getTickets);
 router.get("/:id", getTicketById);
-router.post("/:id/reserve", reserveSeats);
 
 module.exports = router;
