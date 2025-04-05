@@ -7,6 +7,7 @@ import {
   getCurrentUser,
   getUserById,
   updateUserInfo,
+  userTicket,
 } from "../controllers/UserController";
 
 //Middlewares
@@ -38,6 +39,7 @@ router.put(
   authGuard,
   changePassword
 );
+router.put("/add-user-ticket/:id", userTicket);
 router.get("/profile", authGuard, getCurrentUser);
 router.get("/:id", getUserById);
 

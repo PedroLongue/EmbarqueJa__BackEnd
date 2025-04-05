@@ -1,3 +1,12 @@
+const TicketUser = {
+  ticketId: String,
+  paymentMethod: {
+    type: String,
+    enum: ["credit-card", "pix"],
+    required: true,
+  },
+};
+
 export const User = require("mongoose").model("User", {
   name: String,
   email: String,
@@ -5,4 +14,5 @@ export const User = require("mongoose").model("User", {
   isAdmin: { type: Boolean, default: false },
   cpf: { type: String, required: false },
   birthDate: { type: Date, required: false },
+  userTickets: { type: [TicketUser], default: [] },
 });
