@@ -5,6 +5,7 @@ const TicketUser = {
     enum: ["credit-card", "pix"],
     required: true,
   },
+  userSeats: { type: [Number], required: true },
 };
 
 export const User = require("mongoose").model("User", {

@@ -101,6 +101,7 @@ export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
       isAdmin: user.isAdmin,
       cpf: user.cpf || null,
       birthDate: user.birthDate || null,
+      userTickets: user.userTickets || [],
     });
   } catch (error) {
     res.status(404).json({ errors: ["Usuário não encontrado"] });
@@ -210,7 +211,7 @@ export const updateUserInfo = async (req: IAuthRequest, res: Response) => {
 };
 
 export const userTicket = async (req: Request, res: Response) => {
-  const { ticketId, paymentMethod } = req.body;
+  const { ticketId, paymentMethod, userSeats } = req.body;
   const { id: userId } = req.params;
 
   console.log(req.body);
@@ -227,6 +228,7 @@ export const userTicket = async (req: Request, res: Response) => {
     user.userTickets.push({
       ticketId,
       paymentMethod,
+      userSeats,
     });
 
     await user.save();
