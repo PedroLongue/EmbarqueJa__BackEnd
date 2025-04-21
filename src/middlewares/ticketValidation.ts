@@ -56,10 +56,32 @@ export const updateUserValidation = () => {
       .optional()
       .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/)
       .withMessage("Insira um CPF válido no formato XXX.XXX.XXX-XX."),
+
     body("birthDate")
       .optional()
-      .isISO8601()
-      .toDate()
-      .withMessage("Insira uma data de nascimento válida (YYYY-MM-DD)."),
+      .matches(/^\d{2}\/\d{2}\/\d{4}$/)
+      .withMessage(
+        "Insira uma data de nascimento válida no formato DD/MM/YYYY."
+      )
+      .customSanitizer((value: string) => {
+        const [day, month, year] = value.split("/");
+        return `${year}-${month}-${day}`;
+      })
+      .custom((value: string) => {
+        console.log(value);
+        const date = new Date(value);
+        const [year, month, day] = value.split("-").map(Number);
+
+        const isValid =
+          date.getFullYear() == year &&
+          date.getMonth() + 1 == month &&
+          date.getDate() + 1 == day;
+
+        if (!isValid) {
+          throw new Error("Data de nascimento inválida.");
+        }
+
+        return true;
+      }),
   ];
 };
