@@ -1,11 +1,26 @@
 import express from "express";
-const cors = require("cors");
+import http from "http";
+import cors from "cors";
+import { Server } from "socket.io";
+import dotenv from "dotenv";
+import { socketHandler } from "./socket/socketHandler";
 
-require("dotenv").config();
+dotenv.config();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const app = express();
+const server = http.createServer(app);
 
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  },
+});
+
+socketHandler(io);
+
+// Middlewares
 app.use(
   cors({
     origin: "*",
@@ -13,17 +28,16 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-//routes
-const router = require("./routes/Router.ts");
-
 app.use(express.json());
 
+// Rotas
+const router = require("./routes/Router.ts");
 app.use(router);
 
-//DB connextion
+// Banco de dados
 require("./config/db.ts");
 
-app.listen(PORT, () => {
+// Inicia servidor
+server.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
