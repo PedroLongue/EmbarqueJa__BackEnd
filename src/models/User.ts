@@ -16,4 +16,8 @@ export const User = require("mongoose").model("User", {
   cpf: { type: String, required: false },
   birthDate: { type: Date, required: false },
   userTickets: { type: [TicketUser], default: [] },
+  faceIdDescriptor: {
+    type: [Number],
+    default: null,
+  },
 });

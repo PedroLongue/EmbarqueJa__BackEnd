@@ -18,7 +18,11 @@ export const generateToken = (id: string) => {
 
 // Register user and sign in
 export const register = async (req: IAuthRequest, res: Response) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    return res.status(422).json({ errors: ["As senhas não coincidem."] });
+  }
 
   //check if user exists
   const user = await User.findOne({ email });
@@ -86,12 +90,13 @@ export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
 
   try {
     const user = await User.findById(userId).select("-password");
-
     // Verifica se o usuário existe
     if (!user) {
       res.status(404).json({ errors: ["Usuário não encontrado"] });
       return;
     }
+
+    console.log("face-id: ", user.faceIdDescriptor);
 
     // Retorna o usuário com o campo isAdmin
     res.status(200).json({
@@ -102,6 +107,7 @@ export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
       cpf: user.cpf || null,
       birthDate: user.birthDate || null,
       userTickets: user.userTickets || [],
+      faceIdDescriptor: !!user.faceIdDescriptor?.length,
     });
   } catch (error) {
     res.status(404).json({ errors: ["Usuário não encontrado"] });
@@ -188,7 +194,6 @@ export const updateUserInfo = async (req: IAuthRequest, res: Response) => {
       return res.status(404).json({ errors: ["Usuário não encontrado."] });
     }
 
-    // Atualiza os dados opcionais
     if (cpf) user.cpf = cpf;
     if (birthDate) user.birthDate = new Date(birthDate);
 
@@ -224,7 +229,6 @@ export const userTicket = async (req: Request, res: Response) => {
       return res.status(404).json({ errors: ["Usuário não encontrado."] });
     }
 
-    // Adiciona novo ticket ao array userTickets
     user.userTickets.push({
       ticketId,
       paymentMethod,
@@ -244,4 +248,45 @@ export const userTicket = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ errors: ["Erro ao atualizar informações."] });
   }
+};
+
+import euclideanDistance from "../utils/euclideanDistance";
+
+export const registerFaceId = async (req: IAuthRequest, res: Response) => {
+  const { descriptor } = req.body;
+
+  if (!req.user || !descriptor) {
+    return res.status(400).json({ errors: ["Dados inválidos."] });
+  }
+
+  try {
+    const user = await User.findById(req.user);
+    if (!user)
+      return res.status(404).json({ errors: ["Usuário não encontrado."] });
+
+    user.faceIdDescriptor = descriptor;
+    await user.save();
+
+    res.status(200).json({ message: "FaceID cadastrado com sucesso." });
+  } catch (err) {
+    res.status(500).json({ errors: ["Erro ao salvar FaceID."] });
+  }
+};
+
+export const loginFaceId = async (req: Request, res: Response) => {
+  const { descriptor } = req.body;
+  if (!descriptor)
+    return res.status(400).json({ errors: ["Descriptor ausente."] });
+
+  const users = await User.find({ faceIdDescriptor: { $ne: null } });
+  for (const user of users) {
+    const distance = euclideanDistance(user.faceIdDescriptor, descriptor);
+    if (distance < 0.6) {
+      return res
+        .status(200)
+        .json({ _id: user._id, token: generateToken(user._id) });
+    }
+  }
+
+  return res.status(401).json({ errors: ["Rosto não reconhecido."] });
 };

@@ -8,6 +8,9 @@ import {
   getUserById,
   updateUserInfo,
   userTicket,
+  changePassword,
+  registerFaceId,
+  loginFaceId,
 } from "../controllers/UserController";
 
 //Middlewares
@@ -18,7 +21,6 @@ import {
 } from "../middlewares/userValidation";
 
 import { changePasswordValidation } from "../middlewares/userValidation";
-import { changePassword } from "../controllers/UserController";
 
 import { authGuard } from "../middlewares/authGuard";
 import { updateUserValidation } from "../middlewares/ticketValidation";
@@ -42,5 +44,7 @@ router.put(
 router.put("/add-user-ticket/:id", userTicket);
 router.get("/profile", authGuard, getCurrentUser);
 router.get("/:id", getUserById);
+router.post("/faceid", authGuard, registerFaceId);
+router.post("/login-faceid", loginFaceId);
 
 module.exports = router;

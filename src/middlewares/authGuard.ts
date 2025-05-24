@@ -15,6 +15,8 @@ export const authGuard = async (
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
+  console.log({ token });
+
   //check if header has a token
   if (!token) return res.status(401).json({ erros: ["Acesso negado!"] });
 
