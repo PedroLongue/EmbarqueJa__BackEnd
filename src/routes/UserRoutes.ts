@@ -11,6 +11,7 @@ import {
   changePassword,
   registerFaceId,
   loginFaceId,
+  forgotPassword,
 } from "../controllers/UserController";
 
 //Middlewares
@@ -46,5 +47,6 @@ router.get("/profile", authGuard, getCurrentUser);
 router.get("/:id", getUserById);
 router.post("/faceid", authGuard, registerFaceId);
 router.post("/login-faceid", loginFaceId);
+router.post("/forgot-password", forgotPassword);
 
 module.exports = router;
