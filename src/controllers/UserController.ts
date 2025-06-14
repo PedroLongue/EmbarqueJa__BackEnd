@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 
 const jwtSecret = process.env.JWT_SECRET;
 import crypto from "crypto";
-import nodemailer from "nodemailer";
 
 interface IAuthRequest extends Request {
   user?: string;
@@ -253,6 +252,10 @@ export const userTicket = async (req: Request, res: Response) => {
 };
 
 import euclideanDistance from "../utils/euclideanDistance";
+import {
+  sendNewPasswordEmail,
+  sendResetPasswordEmail,
+} from "../services/email/sendResetPasswordEmail";
 
 export const registerFaceId = async (req: IAuthRequest, res: Response) => {
   const { descriptor } = req.body;
@@ -292,6 +295,7 @@ export const loginFaceId = async (req: Request, res: Response) => {
 
   return res.status(401).json({ errors: ["Rosto não reconhecido."] });
 };
+
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ errors: ["E-mail obrigatório."] });
@@ -302,7 +306,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(404).json({ errors: ["Usuário não encontrado."] });
 
     const token = crypto.randomBytes(32).toString("hex");
-    const expiration = new Date(Date.now() + 1000 * 60 * 1); // 30min
+    const expiration = new Date(Date.now() + 1000 * 60 * 30); // 30 min
 
     user.resetToken = token;
     user.resetTokenExpiration = expiration;
@@ -310,25 +314,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     const resetLink = `${process.env.BACKEND_URL}/api/users/confirm-reset?token=${token}`;
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"Equipe" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: "Redefinição de Senha",
-      html: `
-        <p>Olá, ${user.name || "usuário"}!</p>
-        <p>Clique no botão abaixo para gerar uma nova senha segura:</p>
-        <a href="${resetLink}" style="padding:10px 20px; background:#1976d2; color:white; text-decoration:none;">Gerar nova senha</a>
-        <p>Este link expira em 30 minutos.</p>
-      `,
-    });
+    await sendResetPasswordEmail(user.email, user.name, resetLink);
 
     return res
       .status(200)
@@ -352,8 +338,6 @@ export const confirmResetPassword = async (req: Request, res: Response) => {
       resetTokenExpiration: { $gt: new Date() },
     });
 
-    console.log({ user });
-
     if (!user) {
       return res.status(400).send("Token inválido ou expirado.");
     }
@@ -366,24 +350,7 @@ export const confirmResetPassword = async (req: Request, res: Response) => {
     user.resetTokenExpiration = undefined;
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"Equipe" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: "Sua nova senha",
-      html: `
-        <p>Olá, ${user.name || "usuário"}!</p>
-        <p>Sua nova senha é: <strong>${novaSenha}</strong></p>
-        <p>Recomendamos alterá-la após o login.</p>
-      `,
-    });
+    await sendNewPasswordEmail(user.email, user.name, novaSenha);
 
     return res
       .status(200)

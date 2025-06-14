@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { TicketReservation } from "../models/ReservationTicket";
+import { Tickets } from "../models/Tickets";
+import { sendTicketEmailService } from "../services/email/sendTicketEmail";
 
 export const createTicketReservation = async (req: Request, res: Response) => {
   const { userId, ticketId, seats } = req.body;
@@ -93,8 +95,6 @@ export const confirmReservation = async (req: Request, res: Response) => {
   }
 };
 
-import { Tickets } from "../models/Tickets";
-
 export const cancelReservation = async (req: Request, res: Response) => {
   const { reservationId } = req.params;
 
@@ -129,5 +129,36 @@ export const cancelReservation = async (req: Request, res: Response) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Erro ao cancelar reserva.", error });
+  }
+};
+
+export const sendTicketEmail = async (req: Request, res: Response) => {
+  const { to, origin, destination, departureDate, departureTime, seats } =
+    req.body;
+
+  if (
+    !to ||
+    !origin ||
+    !destination ||
+    !departureDate ||
+    !Array.isArray(seats)
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Dados incompletos para envio do e-mail." });
+  }
+
+  try {
+    await sendTicketEmailService(to, {
+      origin,
+      destination,
+      departureDate,
+      departureTime,
+      seats,
+    });
+    res.status(200).json({ message: "E-mail enviado com sucesso." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erro ao enviar e-mail.", error });
   }
 };
