@@ -12,6 +12,7 @@ import {
   registerFaceId,
   loginFaceId,
   forgotPassword,
+  confirmResetPassword,
 } from "../controllers/UserController";
 
 //Middlewares
@@ -43,6 +44,7 @@ router.put(
   changePassword
 );
 router.put("/add-user-ticket/:id", userTicket);
+router.get("/confirm-reset", confirmResetPassword);
 router.get("/profile", authGuard, getCurrentUser);
 router.get("/:id", getUserById);
 router.post("/faceid", authGuard, registerFaceId);

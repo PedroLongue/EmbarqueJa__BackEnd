@@ -292,34 +292,24 @@ export const loginFaceId = async (req: Request, res: Response) => {
 
   return res.status(401).json({ errors: ["Rosto não reconhecido."] });
 };
-
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
-
-  if (!email) {
-    return res
-      .status(400)
-      .json({ errors: ["O campo de e-mail é obrigatório."] });
-  }
+  if (!email) return res.status(400).json({ errors: ["E-mail obrigatório."] });
 
   try {
     const user = await User.findOne({ email });
-
-    if (!user) {
+    if (!user)
       return res.status(404).json({ errors: ["Usuário não encontrado."] });
-    }
 
-    // Gerar nova senha aleatória
-    const novaSenha = crypto.randomBytes(4).toString("hex");
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiration = new Date(Date.now() + 1000 * 60 * 1); // 30min
 
-    // Hash da nova senha
-    const salt = await bcrypt.genSalt();
-    const hashed = await bcrypt.hash(novaSenha, salt);
-    user.password = hashed;
-
+    user.resetToken = token;
+    user.resetTokenExpiration = expiration;
     await user.save();
 
-    // Transporter do nodemailer
+    const resetLink = `${process.env.BACKEND_URL}/api/users/confirm-reset?token=${token}`;
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -328,21 +318,78 @@ export const forgotPassword = async (req: Request, res: Response) => {
       },
     });
 
-    // Enviar e-mail
     await transporter.sendMail({
       from: `"Equipe" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: "Recuperação de Senha",
+      subject: "Redefinição de Senha",
       html: `
         <p>Olá, ${user.name || "usuário"}!</p>
-        <p>Sua nova senha é: <strong>${novaSenha}</strong></p>
-        <p>Use-a para fazer login e altere-a em seguida.</p>
+        <p>Clique no botão abaixo para gerar uma nova senha segura:</p>
+        <a href="${resetLink}" style="padding:10px 20px; background:#1976d2; color:white; text-decoration:none;">Gerar nova senha</a>
+        <p>Este link expira em 30 minutos.</p>
       `,
     });
 
-    return res.status(200).json({ message: "E-mail enviado com nova senha." });
+    return res
+      .status(200)
+      .json({ message: "E-mail com link de confirmação enviado." });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ errors: ["Erro ao enviar e-mail."] });
+  }
+};
+
+export const confirmResetPassword = async (req: Request, res: Response) => {
+  const { token } = req.query;
+
+  if (!token || typeof token !== "string") {
+    return res.status(400).json({ errors: ["Token inválido."] });
+  }
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiration: { $gt: new Date() },
+    });
+
+    console.log({ user });
+
+    if (!user) {
+      return res.status(400).send("Token inválido ou expirado.");
+    }
+
+    const novaSenha = crypto.randomBytes(4).toString("hex");
+    const salt = await bcrypt.genSalt();
+    user.password = await bcrypt.hash(novaSenha, salt);
+
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await user.save();
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Equipe" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "Sua nova senha",
+      html: `
+        <p>Olá, ${user.name || "usuário"}!</p>
+        <p>Sua nova senha é: <strong>${novaSenha}</strong></p>
+        <p>Recomendamos alterá-la após o login.</p>
+      `,
+    });
+
+    return res
+      .status(200)
+      .send("Nova senha enviada por e-mail. Você pode fechar esta página.");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ errors: ["Erro ao redefinir senha."] });
   }
 };

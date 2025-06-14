@@ -20,4 +20,6 @@ export const User = require("mongoose").model("User", {
     type: [Number],
     default: null,
   },
+  resetToken: String,
+  resetTokenExpiration: Date,
 });

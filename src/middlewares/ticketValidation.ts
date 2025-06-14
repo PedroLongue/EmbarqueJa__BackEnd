@@ -30,7 +30,9 @@ export const ticketValidation = () => {
       .isString()
       .withMessage("O tipo de passagem é obrigatório.")
       .isIn(["Convencional", "Leito", "Semi-Leito", "Executivo", "Leito-cama"])
-      .withMessage("O tipo deve ser 'Convencional', 'Leito' ou 'Semi-Leito'."),
+      .withMessage(
+        "O tipo deve ser 'Convencional', 'Leito', 'Semi-Leito', 'Executivo' ou 'Leito-cama'."
+      ),
 
     body("amenities")
       .isArray()
