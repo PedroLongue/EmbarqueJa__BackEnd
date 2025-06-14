@@ -133,11 +133,11 @@ export const cancelReservation = async (req: Request, res: Response) => {
 };
 
 export const sendTicketEmail = async (req: Request, res: Response) => {
-  const { to, origin, destination, departureDate, departureTime, seats } =
+  const { email, origin, destination, departureDate, departureTime, seats } =
     req.body;
 
   if (
-    !to ||
+    !email ||
     !origin ||
     !destination ||
     !departureDate ||
@@ -149,7 +149,7 @@ export const sendTicketEmail = async (req: Request, res: Response) => {
   }
 
   try {
-    await sendTicketEmailService(to, {
+    await sendTicketEmailService(email, {
       origin,
       destination,
       departureDate,
