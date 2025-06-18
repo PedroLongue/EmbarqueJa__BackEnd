@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: ["http://localhost:5173", "http://31.97.171.60:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   },
 });
@@ -23,7 +23,7 @@ socketHandler(io);
 // Middlewares
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:5173", "http://31.97.171.60:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
