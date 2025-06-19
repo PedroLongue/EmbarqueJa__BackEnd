@@ -312,7 +312,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.resetTokenExpiration = expiration;
     await user.save();
 
-    const resetLink = `${process.env.BACKEND_URL}/api/users/confirm-reset?token=${token}`;
+    const resetLink = `https://embarqueja.xyz/api/users/confirm-reset?token=${token}`;
 
     await sendResetPasswordEmail(user.email, user.name, resetLink);
 
