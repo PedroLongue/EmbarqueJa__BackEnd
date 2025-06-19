@@ -1,5 +1,5 @@
-name: Build and Publish Docker Image
-run-name: Build and publish Docker image
+name: Build, Publish Docker Image and Deploy Backend
+run-name: Build, Publish Docker Image and Deploy Backend
 
 on:
   push:
@@ -23,9 +23,24 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image for backend
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/embarque-ja-backend:latest
+
+      - name: SSH to VPS and deploy backend container
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            sudo docker stop backend || true
+            sudo docker rm backend || true
+
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/embarque-ja-backend:latest
+
+            sudo docker run -d --env-file ~/app-config/.env --name backend -p 3000:3000 ${{ secrets.DOCKER_USERNAME }}/embarque-ja-backend:latest
