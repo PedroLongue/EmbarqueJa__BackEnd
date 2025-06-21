@@ -4,6 +4,7 @@ import cors from "cors";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 import { socketHandler } from "./socket/socketHandler";
+import { setupSwagger } from "./config/swagger";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use(
   })
 );
 app.use(express.json());
+setupSwagger(app);
 
 // Rotas
 const router = require("./routes/Router.ts");
