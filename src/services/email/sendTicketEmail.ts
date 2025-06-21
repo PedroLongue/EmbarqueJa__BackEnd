@@ -30,9 +30,9 @@ export const sendTicketEmailService = async (
       <h2>Obrigado por comprar com a EmbarqueJá!</h2>
       <p><strong>Origem:</strong> ${ticketInfo.origin}</p>
       <p><strong>Destino:</strong> ${ticketInfo.destination}</p>
-      <p><strong>Data:</strong> ${new Date(
-        ticketInfo.departureDate
-      ).toLocaleDateString()} | ${ticketInfo.departureTime}</p>
+      <p><strong>Data:</strong> ${new Intl.DateTimeFormat("pt-BR").format(
+        new Date(ticketInfo.departureDate)
+      )} | ${ticketInfo.departureTime}</p>
       <p><strong>Assento(s):</strong> ${ticketInfo.seats.join(", ")}</p>
       <br/>
       <p>Apresente o QR Code abaixo no embarque:</p>
