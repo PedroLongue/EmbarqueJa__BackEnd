@@ -9,8 +9,8 @@ import {
   updateUserInfo,
   userTicket,
   changePassword,
-  registerFaceId,
-  loginFaceId,
+  registerFace,
+  loginFace,
   forgotPassword,
   confirmResetPassword,
 } from "../controllers/UserController";
@@ -49,8 +49,8 @@ router.put("/add-user-ticket/:id", userTicket);
 router.get("/confirm-reset", confirmResetPassword);
 router.get("/profile", authGuard, getCurrentUser);
 router.get("/:id", getUserById);
-router.post("/faceid", authGuard, registerFaceId);
-router.post("/login-faceid", loginFaceId);
+router.post("/register-face", authGuard, registerFace);
+router.post("/login-face", loginFace);
 router.post("/forgot-password", forgotPassword);
 
 module.exports = router;
@@ -128,7 +128,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /api/users/faceid:
+ * /api/users/register-face:
  *   post:
  *     summary: Register facial recognition data for user authentication
  *     tags: [Users]
@@ -168,7 +168,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /api/users/login-faceid:
+ * /api/users/login-face:
  *   post:
  *     summary: Authenticate user via face recognition
  *     tags: [Users]

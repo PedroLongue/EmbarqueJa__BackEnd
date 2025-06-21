@@ -97,8 +97,6 @@ export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
       return;
     }
 
-    console.log("face-id: ", user.faceIdDescriptor);
-
     // Retorna o usuário com o campo isAdmin
     res.status(200).json({
       _id: user._id,
@@ -108,7 +106,7 @@ export const getCurrentUser = async (req: IAuthRequest, res: Response) => {
       cpf: user.cpf || null,
       birthDate: user.birthDate || null,
       userTickets: user.userTickets || [],
-      faceIdDescriptor: !!user.faceIdDescriptor?.length,
+      faceAuthDescriptor: !!user.faceAuthDescriptor?.length,
     });
   } catch (error) {
     res.status(404).json({ errors: ["Usuário não encontrado"] });
@@ -257,7 +255,7 @@ import {
   sendResetPasswordEmail,
 } from "../services/email/sendResetPasswordEmail";
 
-export const registerFaceId = async (req: IAuthRequest, res: Response) => {
+export const registerFace = async (req: IAuthRequest, res: Response) => {
   const { descriptor } = req.body;
 
   if (!req.user || !descriptor) {
@@ -269,23 +267,23 @@ export const registerFaceId = async (req: IAuthRequest, res: Response) => {
     if (!user)
       return res.status(404).json({ errors: ["Usuário não encontrado."] });
 
-    user.faceIdDescriptor = descriptor;
+    user.faceAuthDescriptor = descriptor;
     await user.save();
 
-    res.status(200).json({ message: "FaceID cadastrado com sucesso." });
+    res.status(200).json({ message: "Rosto cadastrado com sucesso." });
   } catch (err) {
-    res.status(500).json({ errors: ["Erro ao salvar FaceID."] });
+    res.status(500).json({ errors: ["Erro ao salvar rosto."] });
   }
 };
 
-export const loginFaceId = async (req: Request, res: Response) => {
+export const loginFace = async (req: Request, res: Response) => {
   const { descriptor } = req.body;
   if (!descriptor)
     return res.status(400).json({ errors: ["Descriptor ausente."] });
 
-  const users = await User.find({ faceIdDescriptor: { $ne: null } });
+  const users = await User.find({ faceAuthDescriptor: { $ne: null } });
   for (const user of users) {
-    const distance = euclideanDistance(user.faceIdDescriptor, descriptor);
+    const distance = euclideanDistance(user.faceAuthDescriptor, descriptor);
     if (distance < 0.6) {
       return res
         .status(200)
