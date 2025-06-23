@@ -64,6 +64,8 @@ module.exports = router;
  *     description: Ticket creation and searching
  *   - name: Reservations
  *     description: Reservation handling and seat management
+ *   - name: ValidatePassengers
+ *     description: Passenger validation in boarding
  */
 
 /**
