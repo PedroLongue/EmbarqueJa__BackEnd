@@ -55,36 +55,42 @@ export const adminValidateFace = async (req: IAuthRequest, res: Response) => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  today.setHours(today.getHours() - 3);
+
+  console.log("today", today);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const faces = await PassengerFace.find().populate({
-    path: "ticketId",
-    model: Tickets,
-  });
+  const faces = await PassengerFace.find().populate("ticketId");
 
   for (const face of faces) {
+    const ticket = face.ticketId as typeof Tickets & { departureDate?: Date };
+
+    if (!ticket || !ticket.departureDate) {
+      console.log(`[SKIP] ${face.name} não tem ticket válido.`);
+      continue;
+    }
+
+    console.log(`[CHECK] ${face.name} - ${ticket.departureDate.toISOString()}`);
+
+    if (ticket.departureDate < today || ticket.departureDate >= tomorrow) {
+      console.log(`[SKIP] ${face.name} não tem viagem para hoje.`);
+      continue;
+    }
+
     const distance = euclideanDistance(face.descriptor, descriptor);
 
     if (distance < 0.6) {
-      const ticket = face.ticketId as typeof Tickets & { departureDate?: Date };
-
-      if (!ticket || !ticket.departureDate) {
-        continue;
-      }
-
-      if (ticket.departureDate >= today && ticket.departureDate < tomorrow) {
-        return res.status(200).json({
-          name: face.name,
-          cpf: face.cpf,
-          company: ticket.company,
-          departureTime: ticket.departureTime,
-          origin: ticket.origin,
-          destination: ticket.destination,
-        });
-      } else {
-        console.log(`[SKIP] ${face.name} não tem viagem para hoje.`);
-      }
+      return res.status(200).json({
+        name: face.name,
+        cpf: face.cpf,
+        company: ticket.company,
+        departureTime: ticket.departureTime,
+        origin: ticket.origin,
+        destination: ticket.destination,
+      });
+    } else {
+      console.log(`[NO MATCH] ${face.name} não corresponde ao descriptor`);
     }
   }
 
