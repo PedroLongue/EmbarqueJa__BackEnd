@@ -9,13 +9,23 @@ export const sendTicketEmailService = async (
     departureDate: string;
     departureTime: string;
     seats: number[];
+    passangers: {
+      name: string;
+      cpf: string;
+    }[];
   }
 ) => {
-  const qrData = `Passagem - ${ticketInfo.origin} → ${
-    ticketInfo.destination
-  } em ${ticketInfo.departureDate} - Assento(s): ${ticketInfo.seats.join(
-    ", "
-  )}`;
+  const queryParams = new URLSearchParams({
+    origin: ticketInfo.origin,
+    destination: ticketInfo.destination,
+    departureDate: ticketInfo.departureDate,
+    departureTime: ticketInfo.departureTime,
+    seats: ticketInfo.seats.join(","),
+    passengers: JSON.stringify(ticketInfo.passangers),
+  });
+
+  const qrData = `http://embarqueja.xyz/validate-from-qr-code?${queryParams.toString()}`;
+
   const qrCodeBase64 = await QRCode.toDataURL(qrData);
   const qrCodeBuffer = Buffer.from(
     qrCodeBase64.replace(/^data:image\/png;base64,/, ""),
@@ -33,6 +43,13 @@ export const sendTicketEmailService = async (
       <p><strong>Data:</strong> ${new Intl.DateTimeFormat("pt-BR").format(
         new Date(ticketInfo.departureDate)
       )} | ${ticketInfo.departureTime}</p>
+      <p><strong>Passageiro(s):</strong></p>
+      <ul>
+        ${ticketInfo.passangers
+          .map((p) => `<li>${p.name} - CPF: ${p.cpf}</li>`)
+          .join("")}
+      </ul>
+      <br/>
       <p><strong>Assento(s):</strong> ${ticketInfo.seats.join(", ")}</p>
       <br/>
       <p>Apresente o QR Code abaixo no embarque:</p>

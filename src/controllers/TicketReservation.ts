@@ -133,15 +133,26 @@ export const cancelReservation = async (req: Request, res: Response) => {
 };
 
 export const sendTicketEmail = async (req: Request, res: Response) => {
-  const { email, origin, destination, departureDate, departureTime, seats } =
-    req.body;
+  const {
+    email,
+    origin,
+    destination,
+    departureDate,
+    departureTime,
+    seats,
+    passangers,
+  } = req.body;
 
   if (
     !email ||
     !origin ||
     !destination ||
     !departureDate ||
-    !Array.isArray(seats)
+    !Array.isArray(seats) ||
+    seats.length === 0 ||
+    passangers === undefined ||
+    !Array.isArray(passangers) ||
+    passangers.length === 0
   ) {
     return res
       .status(400)
@@ -155,6 +166,7 @@ export const sendTicketEmail = async (req: Request, res: Response) => {
       departureDate,
       departureTime,
       seats,
+      passangers: passangers || [],
     });
     res.status(200).json({ message: "E-mail enviado com sucesso." });
   } catch (error) {
