@@ -65,7 +65,7 @@ export const getPendingReservation = async (req: Request, res: Response) => {
 
     if (!reservation) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "Nenhuma reserva pendente encontrada." });
     }
 
